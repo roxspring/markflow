@@ -1,0 +1,12 @@
+# Default: normalise line endings to LF on commit
+* text=auto eol=lf
+
+# Gradle wrapper scripts must be LF (executed on all platforms)
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+
+# Binaries — no line-ending conversion
+*.jar binary
+*.png binary
+*.jpg binary
+*.gif binary
