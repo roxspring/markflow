@@ -1,6 +1,7 @@
 plugins {
     id("markflow.convention")
     `java-gradle-plugin`
+    `maven-publish`
 }
 
 dependencies {
@@ -15,6 +16,21 @@ gradlePlugin {
         create("markflow") {
             id = "net.oxspring.markflow"
             implementationClass = "net.oxspring.markflow.gradle.MarkflowPlugin"
+            displayName = "Markflow"
+            description = "Gradle plugin for Markdown processing pipelines"
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/roxspring/markflow")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }

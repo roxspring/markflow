@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,3 +29,10 @@ jobs:
 
       - name: Build
         run: ./gradlew build
+
+      - name: Publish
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'chore(main): release')
+        run: ./gradlew publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
