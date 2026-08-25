@@ -6,7 +6,7 @@ jacksonYaml = "2.19.0"
 junit5 = "6.1.3"
 kotlin = "2.2.0"
 kover = "0.9.9"
-ktlint-gradle = "12.1.1"
+ktlint-gradle = "14.2.0"
 
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
