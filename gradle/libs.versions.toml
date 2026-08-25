@@ -1,5 +1,5 @@
 [versions]
-assertj = "3.27.3"
+assertj = "3.27.7"
 flexmark = "0.64.8"
 git-versioning = "6.4.4"
 jacksonYaml = "2.19.0"
