@@ -16,6 +16,7 @@ commonmark-ext-yaml-front-matter = { module = "org.commonmark:commonmark-ext-yam
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson-yaml" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-yaml" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit5" }
 
 [plugins]
 git-versioning = { id = "me.qoomon.git-versioning", version.ref = "git-versioning" }
