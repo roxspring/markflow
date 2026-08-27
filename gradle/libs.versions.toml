@@ -1,8 +1,8 @@
 [versions]
 assertj = "3.27.7"
-flexmark = "0.64.8"
+commonmark = "0.30.0"
 git-versioning = "6.4.4"
-jacksonYaml = "2.22.2"
+jackson-yaml = "2.22.2"
 junit5 = "6.1.3"
 kotlin = "2.4.10"
 kover = "0.9.9"
@@ -10,11 +10,12 @@ ktlint-gradle = "14.2.0"
 
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
-flexmark-all = { module = "com.vladsch.flexmark:flexmark-all", version.ref = "flexmark" }
-jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jacksonYaml" }
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonYaml" }
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+commonmark-ext-gfm-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
+commonmark-ext-yaml-front-matter = { module = "org.commonmark:commonmark-ext-yaml-front-matter", version.ref = "commonmark" }
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson-yaml" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-yaml" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5" }
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 
 [plugins]
 git-versioning = { id = "me.qoomon.git-versioning", version.ref = "git-versioning" }

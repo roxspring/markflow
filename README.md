@@ -5,11 +5,11 @@ Parse, transform, and emit Markdown (or HTML) with a composable, AST-based API.
 
 ## Overview
 
-markflow is built on [Flexmark-java](https://github.com/vsch/flexmark-java) and provides:
+markflow is built on [commonmark-java](https://github.com/commonmark/commonmark-java) and provides:
 
 - A clean Kotlin API for parsing Markdown into a mutable AST
 - Composable transformation passes (heading manipulation, front matter promotion, etc.)
-- Round-trip Markdown output via Flexmark's `Formatter`, with reliable front matter handling
+- Round-trip Markdown output via commonmark-java's `MarkdownRenderer`, with reliable front matter handling
 - A Gradle plugin exposing common transformations as cacheable, incremental tasks
 
 It is **not** a static site generator. It is a document-processing library and build-tool
@@ -17,29 +17,38 @@ integration layer — the Markdown equivalent of what a CSS post-processor does 
 
 ## Design Decisions
 
-### Parser: Flexmark-java
+### Parser: commonmark-java
 
-markflow uses [Flexmark-java](https://github.com/vsch/flexmark-java) as its parser and formatter.
-Flexmark was chosen because:
+markflow uses [commonmark-java](https://github.com/commonmark/commonmark-java) as its parser and
+formatter. commonmark-java was chosen because:
 
-- It has the most mature round-trip Markdown output (`Formatter`) of any JVM library
-- Its extension API is clean and well-suited to custom AST node types
-- It supports GFM tables, YAML front matter, and other common extensions out of the box
-- It is Apache 2.0 licensed, compatible with all likely dependencies
+- It is actively maintained (Atlassian origin, used by OpenJDK, Google, Gerrit)
+- It is spec-compliant with [CommonMark](https://spec.commonmark.org/)
+- It provides round-trip Markdown output via `MarkdownRenderer`
+- It supports GFM tables, YAML front matter (including raw/opaque capture), strikethrough, footnotes,
+  and other common extensions out of the box
+- It is BSD 2-Clause licensed, compatible with all likely dependencies
 
-[JetBrains Markdown](https://github.com/JetBrains/markdown) was considered but ruled out: its AST
-is largely immutable, it has no Markdown output support, and it has no front matter extension.
-It remains the only JVM option for Kotlin Multiplatform targets, but KMP is not a current requirement.
+**Alternatives considered:**
 
-### Front Matter: Opaque Text Node
+[Flexmark-java](https://github.com/vsch/flexmark-java) was the original choice and has a richer
+extension ecosystem (TOC, definition lists, typographic quotes, etc.), but has been effectively
+unmaintained since 2023 with 178+ open issues. The maintenance risk outweighs the extension breadth
+for a library intended for long-term use.
 
-Flexmark's built-in `YamlFrontMatterExtension` parses front matter into key/value pairs but does
-not reliably round-trip it through the `Formatter`. markflow instead provides a custom extension
-that captures the entire front matter block as a single opaque text node in the AST. This means:
+[JetBrains Markdown](https://github.com/JetBrains/markdown) is actively developed but ruled out:
+its AST is largely immutable, it has no Markdown output support, and it targets Kotlin Multiplatform
+which is not a current requirement.
 
-- The `Formatter` preserves front matter verbatim by default
+### Front Matter: Opaque Capture via RawContentParser
+
+commonmark-java's `YamlFrontMatterExtension` supports a `RawContentParser` mode that captures the
+entire front matter block as a single raw string rather than parsing it into key/value pairs. This
+means:
+
+- The `MarkdownRenderer` preserves front matter verbatim by default
 - Callers that need to inspect or modify front matter values do so via Jackson YAML, extracting
-  the raw text from the node, modifying it, and writing it back
+  the raw text, modifying it, and writing it back
 - No front matter content is silently dropped or reordered
 
 ### Transformation Pipeline
@@ -59,18 +68,18 @@ markflow/
 
 ### `library`
 
-The standalone Kotlin library JAR. Depends only on Flexmark-java and Jackson YAML. No build-tool
+The standalone Kotlin library JAR. Depends only on commonmark-java and Jackson YAML. No build-tool
 APIs. Usable from any JVM context: Gradle, Maven, a CLI, application code.
 
 Key types:
 
 | Type | Description |
 |---|---|
-| `MarkdownDocument` | A parsed document: mutable Flexmark `Document` + raw front matter string |
+| `MarkdownDocument` | A parsed document: mutable commonmark-java `Document` + raw front matter string |
 | `MarkdownParser` | Parses a `String` or `File` into a `MarkdownDocument` |
 | `MarkdownTransformer` | Single-responsibility AST transformation pass |
 | `MarkdownPipeline` | Ordered composition of `MarkdownTransformer` instances |
-| `MarkdownFormatter` | Emits a `MarkdownDocument` as Markdown (via Flexmark `Formatter`) or HTML (via `HtmlRenderer`) |
+| `MarkdownFormatter` | Emits a `MarkdownDocument` as Markdown (via `MarkdownRenderer`) or HTML (via `HtmlRenderer`) |
 | `FrontMatter` | Typed view of the front matter block via Jackson YAML |
 
 Built-in transformers:
@@ -82,7 +91,7 @@ Built-in transformers:
 | `TableFormatter` | Pads GFM table columns to consistent widths |
 | `SentencePerLineFormatter` | Splits paragraph text at sentence boundaries, one sentence per line |
 | `TemplateSubstitutor` | Replaces `{{key}}` placeholders with provided values, skipping fenced code blocks |
-| `ScreenshotPlaceholderExpander` | Expands `<!-- screenshot: name.png | alt -->` to `![alt](path/name.png)` |
+| `HtmlCommentExpander` | Expands structured HTML comments to Markdown content via registered handlers |
 
 ### `gradle-plugin`
 
@@ -111,7 +120,7 @@ Sub-packages follow feature boundaries:
 |---|---|
 | `net.oxspring.markflow` | Public API: `MarkdownDocument`, `MarkdownParser`, `MarkdownPipeline`, `MarkdownFormatter` |
 | `net.oxspring.markflow.transform` | Built-in `MarkdownTransformer` implementations |
-| `net.oxspring.markflow.frontmatter` | `FrontMatter`, opaque front matter AST extension |
+| `net.oxspring.markflow.frontmatter` | `FrontMatter`, front matter access utilities |
 | `net.oxspring.markflow.gradle` | Gradle plugin and task implementations |
 
 ## MVP Scope (v1.0)
@@ -129,7 +138,7 @@ The v1.0 MVP targets feature parity with the custom Gradle tasks in the
 markflow replaces this with a `ProcessMarkdownTask` configured with:
 
 - `TemplateSubstitutor` (token substitution, fence-aware)
-- `ScreenshotPlaceholderExpander`
+- `HtmlCommentExpander` with a screenshot handler
 
 ### Replaces front matter title extraction in `BuildPdfTask`
 
@@ -158,16 +167,18 @@ markflow replaces this with a `ProcessMarkdownTask` configured with:
 ./gradlew build      # assemble + check
 ```
 
-Test framework: JUnit 5 (Jupiter) with AssertJ.
+Test framework: JUnit 6 (Jupiter) with AssertJ.
 
 ## Key Dependencies
 
 | Dependency | Version | License |
 |---|---|---|
-| Flexmark-java | 0.64.x | BSD 2-Clause |
+| commonmark-java | 0.30.x | BSD 2-Clause |
+| commonmark-ext-gfm-tables | 0.30.x | BSD 2-Clause |
+| commonmark-ext-yaml-front-matter | 0.30.x | BSD 2-Clause |
 | Jackson YAML | 2.x | Apache 2.0 |
 | Kotlin | 2.x | Apache 2.0 |
-| Gradle Plugin API | 8.x | Apache 2.0 |
+| Gradle Plugin API | 9.x | Apache 2.0 |
 
 ## License
 

@@ -5,7 +5,9 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.flexmark.all)
+    implementation(libs.commonmark)
+    implementation(libs.commonmark.ext.gfm.tables)
+    implementation(libs.commonmark.ext.yaml.front.matter)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.jackson.module.kotlin)
 
