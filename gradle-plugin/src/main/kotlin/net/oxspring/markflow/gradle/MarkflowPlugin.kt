@@ -6,8 +6,10 @@ import org.gradle.api.Project
 /**
  * Markflow Gradle plugin.
  *
- * Registers the `markflow { }` extension block for project-level configuration.
- * Tasks are registered separately (see `LintMarkdownTask`).
+ * Registers:
+ * - `markflow { }` extension for project-level configuration
+ * - `lintMarkdown` task, wired into the `check` lifecycle
+ * - `formatMarkdown` task, not wired into any lifecycle (run explicitly to fix violations)
  *
  * Apply via:
  * ```kotlin
@@ -22,7 +24,7 @@ class MarkflowPlugin : Plugin<Project> {
             target.extensions.create("markflow", MarkflowExtension::class.java, target.objects)
 
         // Default lint sources: all *.md files in the project, excluding the build directory.
-        // The build directory exclusion is resolved lazily so it respects any custom buildDir.
+        // Resolved lazily so it respects any custom buildDir configuration.
         extension.lint.sources.from(
             target.provider {
                 val buildRelPath =
@@ -37,5 +39,26 @@ class MarkflowPlugin : Plugin<Project> {
                 }
             },
         )
+
+        val lintTask =
+            target.tasks.register("lintMarkdown", LintMarkdownTask::class.java) { task ->
+                task.group = "verification"
+                task.description = "Checks that all Markdown files are correctly formatted."
+                task.sources.from(extension.lint.sources)
+            }
+
+        target.tasks.register("formatMarkdown", FormatMarkdownTask::class.java) { task ->
+            task.group = "formatting"
+            task.description = "Formats all Markdown files in-place."
+            task.sources.from(extension.lint.sources)
+            task.fingerprintFile.set(
+                target.layout.buildDirectory.file("markflow/format.fingerprint"),
+            )
+        }
+
+        // Wire lintMarkdown into the check lifecycle if the base plugin is applied.
+        target.plugins.withId("base") {
+            target.tasks.named("check") { it.dependsOn(lintTask) }
+        }
     }
 }
