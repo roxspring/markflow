@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
-class LintMarkdownTaskTest {
+class MarkdownCheckTaskTest {
     private fun buildFile(projectDir: File) =
         File(projectDir, "build.gradle.kts").also {
             it.writeText(
@@ -42,32 +42,32 @@ class LintMarkdownTaskTest {
     }
 
     @Test
-    fun `lintMarkdown passes when all files are already formatted`(
+    fun `markdownCheck passes when all files are already formatted`(
         @TempDir projectDir: File,
     ) {
         buildFile(projectDir)
         File(projectDir, "README.md").writeText(formattedMd())
 
-        val result = runner(projectDir, "lintMarkdown").build()
+        val result = runner(projectDir, "markdownCheck").build()
 
-        assertThat(result.task(":lintMarkdown")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":markdownCheck")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
     @Test
-    fun `lintMarkdown fails when a file is not formatted`(
+    fun `markdownCheck fails when a file is not formatted`(
         @TempDir projectDir: File,
     ) {
         buildFile(projectDir)
         File(projectDir, "README.md").writeText(unformattedMd())
 
-        val result = runner(projectDir, "lintMarkdown").buildAndFail()
+        val result = runner(projectDir, "markdownCheck").buildAndFail()
 
-        assertThat(result.task(":lintMarkdown")?.outcome).isEqualTo(TaskOutcome.FAILED)
+        assertThat(result.task(":markdownCheck")?.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("unformatted file")
     }
 
     @Test
-    fun `lintMarkdown skips files in build directory`(
+    fun `markdownCheck skips files in build directory`(
         @TempDir projectDir: File,
     ) {
         buildFile(projectDir)
@@ -77,8 +77,8 @@ class LintMarkdownTaskTest {
             it.writeText(unformattedMd())
         }
 
-        val result = runner(projectDir, "lintMarkdown").build()
+        val result = runner(projectDir, "markdownCheck").build()
 
-        assertThat(result.task(":lintMarkdown")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":markdownCheck")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 }
