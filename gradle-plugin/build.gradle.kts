@@ -41,9 +41,7 @@ kover {
         total {
             verify {
                 rule {
-                    // GradleRunner functional tests run in a subprocess and are not instrumented
-                    // by Kover; 80% reflects achievable in-process coverage via ProjectBuilder tests.
-                    minBound(80)
+                    minBound(90)
                 }
             }
         }

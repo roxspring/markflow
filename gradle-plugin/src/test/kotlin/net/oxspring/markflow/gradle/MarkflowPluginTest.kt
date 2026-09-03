@@ -28,6 +28,22 @@ class MarkflowPluginTest {
     }
 
     @Test
+    fun `markdownCheck task is registered`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("net.oxspring.markflow")
+        val task = project.tasks.named("markdownCheck", MarkdownCheckTask::class.java).get()
+        assertThat(task.group).isEqualTo("verification")
+    }
+
+    @Test
+    fun `markdownFormat task is registered`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("net.oxspring.markflow")
+        val task = project.tasks.named("markdownFormat", MarkdownFormatTask::class.java).get()
+        assertThat(task.group).isEqualTo("formatting")
+    }
+
+    @Test
     fun `lint sources default includes md files`(
         @TempDir projectDir: File,
     ) {
