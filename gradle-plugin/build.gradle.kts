@@ -41,14 +41,11 @@ kover {
         total {
             verify {
                 rule {
-                    minBound(90)
+                    // GradleRunner functional tests run in a subprocess and are not instrumented
+                    // by Kover; 80% reflects achievable in-process coverage via ProjectBuilder tests.
+                    minBound(80)
                 }
             }
         }
     }
-}
-
-// TODO: remove once tests are in place (issue #14)
-tasks.named("koverVerify") {
-    enabled = false
 }
