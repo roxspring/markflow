@@ -68,8 +68,3 @@ kover {
         }
     }
 }
-
-// TODO: remove once tests are in place (issue #4)
-tasks.named("koverVerify") {
-    enabled = false
-}

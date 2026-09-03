@@ -20,24 +20,26 @@ import org.junit.jupiter.api.Test
  * - An empty document renders as a single newline.
  */
 class FrontMatterRoundTripSpikeTest {
-
     private val extension = YamlFrontMatterExtension.create(RawContentParser.Factory())
 
-    private val parser = Parser.builder()
-        .extensions(listOf(extension))
-        .build()
+    private val parser =
+        Parser
+            .builder()
+            .extensions(listOf(extension))
+            .build()
 
-    private val renderer = MarkdownRenderer.builder()
-        .extensions(listOf(extension))
-        .build()
+    private val renderer =
+        MarkdownRenderer
+            .builder()
+            .extensions(listOf(extension))
+            .build()
 
     /** Renderer always appends a trailing newline — this helper makes assertions self-documenting. */
     private fun withTrailingNewline(s: String) = s + "\n"
 
     private fun roundTrip(input: String): String = renderer.render(parser.parse(input))
 
-    private fun rawFrontMatter(input: String): String =
-        YamlFrontMatterVisitor.readRawContent(parser.parse(input))
+    private fun rawFrontMatter(input: String): String = YamlFrontMatterVisitor.readRawContent(parser.parse(input))
 
     private fun hasFrontMatter(input: String): Boolean = rawFrontMatter(input).isNotEmpty()
 
@@ -47,21 +49,23 @@ class FrontMatterRoundTripSpikeTest {
 
     @Test
     fun `simple key-value front matter round-trips verbatim`() {
-        val input = """
+        val input =
+            """
             ---
             title: Hello World
             weight: 10
             ---
 
             Body content here.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(roundTrip(input)).isEqualTo(withTrailingNewline(input))
     }
 
     @Test
     fun `front matter with array values round-trips verbatim`() {
-        val input = """
+        val input =
+            """
             ---
             title: My Doc
             tags:
@@ -71,14 +75,15 @@ class FrontMatterRoundTripSpikeTest {
             ---
 
             Body content.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(roundTrip(input)).isEqualTo(withTrailingNewline(input))
     }
 
     @Test
     fun `front matter with multiline literal block round-trips verbatim`() {
-        val input = """
+        val input =
+            """
             ---
             title: My Doc
             description: |
@@ -87,14 +92,15 @@ class FrontMatterRoundTripSpikeTest {
             ---
 
             Body content.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(roundTrip(input)).isEqualTo(withTrailingNewline(input))
     }
 
     @Test
     fun `front matter with special characters round-trips verbatim`() {
-        val input = """
+        val input =
+            """
             ---
             title: "Hello: World & Friends"
             subtitle: 'It''s a test'
@@ -102,14 +108,15 @@ class FrontMatterRoundTripSpikeTest {
             ---
 
             Body content.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(roundTrip(input)).isEqualTo(withTrailingNewline(input))
     }
 
     @Test
     fun `front matter with boolean and numeric values round-trips verbatim`() {
-        val input = """
+        val input =
+            """
             ---
             draft: true
             weight: 42
@@ -117,18 +124,19 @@ class FrontMatterRoundTripSpikeTest {
             ---
 
             Body content.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(roundTrip(input)).isEqualTo(withTrailingNewline(input))
     }
 
     @Test
     fun `document without front matter round-trips verbatim`() {
-        val input = """
+        val input =
+            """
             # Heading
 
             Body content with no front matter.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(roundTrip(input)).isEqualTo(withTrailingNewline(input))
     }
@@ -140,7 +148,8 @@ class FrontMatterRoundTripSpikeTest {
 
     @Test
     fun `fenced code blocks in body are preserved`() {
-        val input = """
+        val input =
+            """
             ---
             title: Code Doc
             ---
@@ -149,7 +158,7 @@ class FrontMatterRoundTripSpikeTest {
             val x = 42
             println(x)
             ```
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(roundTrip(input)).isEqualTo(withTrailingNewline(input))
     }
@@ -160,14 +169,15 @@ class FrontMatterRoundTripSpikeTest {
 
     @Test
     fun `raw front matter contains content between delimiters without the dashes`() {
-        val input = """
+        val input =
+            """
             ---
             title: Hello
             weight: 10
             ---
 
             Body.
-        """.trimIndent()
+            """.trimIndent()
 
         // RawContentParser captures content between --- delimiters (not including them),
         // terminated with a trailing newline
@@ -182,11 +192,12 @@ class FrontMatterRoundTripSpikeTest {
 
     @Test
     fun `raw front matter is empty string when absent`() {
-        val input = """
+        val input =
+            """
             # Just a heading
 
             No front matter here.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(rawFrontMatter(input)).isEmpty()
         assertThat(hasFrontMatter(input)).isFalse()
@@ -194,13 +205,14 @@ class FrontMatterRoundTripSpikeTest {
 
     @Test
     fun `hasFrontMatter returns true when front matter present`() {
-        val input = """
+        val input =
+            """
             ---
             title: Hello
             ---
 
             Body.
-        """.trimIndent()
+            """.trimIndent()
 
         assertThat(hasFrontMatter(input)).isTrue()
     }
@@ -211,7 +223,8 @@ class FrontMatterRoundTripSpikeTest {
 
     @Test
     fun `body headings are preserved after front matter`() {
-        val input = """
+        val input =
+            """
             ---
             title: My Doc
             ---
@@ -223,7 +236,7 @@ class FrontMatterRoundTripSpikeTest {
             ## Heading Two
 
             More text.
-        """.trimIndent()
+            """.trimIndent()
 
         val output = roundTrip(input)
         assertThat(output).contains("# Heading One")
