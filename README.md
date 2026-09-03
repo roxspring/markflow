@@ -169,6 +169,36 @@ markflow replaces this with a `ProcessMarkdownTask` configured with:
 
 Test framework: JUnit 6 (Jupiter) with AssertJ.
 
+## Contributing
+
+### Before committing
+
+Each commit should leave the build green. Run:
+
+```bash
+./gradlew build   # tests + ktlint + Kover coverage verification
+```
+
+Fix any ktlint violations with:
+
+```bash
+./gradlew ktlintFormat
+```
+
+### Commit messages
+
+Commit messages are linted by [commitlint](https://commitlint.io) on push (conventional commits
+format). The most common trap: the **first word of the subject must be lowercase**, even if it is
+a proper noun. Prefix with a lowercase verb if the natural first word is a proper noun:
+
+```
+# Bad — subject starts with a proper noun
+feat: Gradle plugin skeleton
+
+# Good — lowercase verb comes first, proper noun follows
+feat: add Gradle plugin skeleton
+```
+
 ## Key Dependencies
 
 | Dependency | Version | License |
