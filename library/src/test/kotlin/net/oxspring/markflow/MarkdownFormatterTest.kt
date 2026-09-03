@@ -4,8 +4,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class MarkdownFormatterTest {
-    private val parser = MarkdownParser()
-    private val formatter = MarkdownFormatter()
+    private val context = MarkdownContext()
+    private val parser = context.parser()
+    private val formatter = context.formatter()
 
     private fun parse(input: String) = parser.parse(input.trimIndent())
 

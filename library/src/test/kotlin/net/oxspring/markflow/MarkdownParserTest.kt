@@ -9,7 +9,8 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class MarkdownParserTest {
-    private val parser = MarkdownParser()
+    private val context = MarkdownContext()
+    private val parser = context.parser()
 
     // -------------------------------------------------------------------------
     // Return type
