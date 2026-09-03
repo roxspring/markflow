@@ -68,3 +68,42 @@ kover {
         }
     }
 }
+
+// Local markdown check/format tasks backed by MarkdownLinterMain.
+// A substitute for the Gradle plugin's own tasks until issue #38 (composite build restructure).
+val markdownFiles =
+    fileTree(rootDir) {
+        include("**/*.md")
+        exclude("**/build/**", "**/.gradle/**")
+    }
+
+tasks.register<JavaExec>("markdownCheck") {
+    group = "verification"
+    description = "Checks that all Markdown files in the repository are correctly formatted."
+    dependsOn(tasks.named("testClasses"))
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("net.oxspring.markflow.MarkdownLinterMainKt")
+    inputs.files(markdownFiles)
+    outputs.file(layout.buildDirectory.file("markflow/markdown-check.txt"))
+    outputs.cacheIf { true }
+    args(listOf("--check") + markdownFiles.files.sorted().map { it.absolutePath })
+    doLast {
+        layout.buildDirectory.file("markflow/markdown-check.txt").get().asFile.apply {
+            parentFile.mkdirs()
+            writeText("OK\n")
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn("markdownCheck")
+}
+
+tasks.register<JavaExec>("markdownFormat") {
+    group = "formatting"
+    description = "Formats all Markdown files in the repository in-place."
+    dependsOn(tasks.named("testClasses"))
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("net.oxspring.markflow.MarkdownLinterMainKt")
+    args(listOf("--format") + markdownFiles.files.sorted().map { it.absolutePath })
+}

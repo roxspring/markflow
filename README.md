@@ -73,25 +73,25 @@ APIs. Usable from any JVM context: Gradle, Maven, a CLI, application code.
 
 Key types:
 
-| Type | Description |
+|Type|Description|
 |---|---|
-| `MarkdownDocument` | A parsed document: mutable commonmark-java `Document` + raw front matter string |
-| `MarkdownParser` | Parses a `String` or `File` into a `MarkdownDocument` |
-| `MarkdownTransformer` | Single-responsibility AST transformation pass |
-| `MarkdownPipeline` | Ordered composition of `MarkdownTransformer` instances |
-| `MarkdownFormatter` | Emits a `MarkdownDocument` as Markdown (via `MarkdownRenderer`) or HTML (via `HtmlRenderer`) |
-| `FrontMatter` | Typed view of the front matter block via Jackson YAML |
+|`MarkdownDocument`|A parsed document: mutable commonmark-java `Document` + raw front matter string|
+|`MarkdownParser`|Parses a `String` or `File` into a `MarkdownDocument`|
+|`MarkdownTransformer`|Single-responsibility AST transformation pass|
+|`MarkdownPipeline`|Ordered composition of `MarkdownTransformer` instances|
+|`MarkdownFormatter`|Emits a `MarkdownDocument` as Markdown (via `MarkdownRenderer`) or HTML (via `HtmlRenderer`)|
+|`FrontMatter`|Typed view of the front matter block via Jackson YAML|
 
 Built-in transformers:
 
-| Transformer | Description |
+|Transformer|Description|
 |---|---|
-| `TitlePromoter` | Extracts `title:` from front matter and prepends an H1 heading if none exists |
-| `HeadingDemoter` | Increments all heading levels by a configurable offset (e.g. H1→H2) |
-| `TableFormatter` | Pads GFM table columns to consistent widths |
-| `SentencePerLineFormatter` | Splits paragraph text at sentence boundaries, one sentence per line |
-| `TemplateSubstitutor` | Replaces `{{key}}` placeholders with provided values, skipping fenced code blocks |
-| `HtmlCommentExpander` | Expands structured HTML comments to Markdown content via registered handlers |
+|`TitlePromoter`|Extracts `title:` from front matter and prepends an H1 heading if none exists|
+|`HeadingDemoter`|Increments all heading levels by a configurable offset (e.g. H1→H2)|
+|`TableFormatter`|Pads GFM table columns to consistent widths|
+|`SentencePerLineFormatter`|Splits paragraph text at sentence boundaries, one sentence per line|
+|`TemplateSubstitutor`|Replaces `{{key}}` placeholders with provided values, skipping fenced code blocks|
+|`HtmlCommentExpander`|Expands structured HTML comments to Markdown content via registered handlers|
 
 ### `gradle-plugin`
 
@@ -102,11 +102,11 @@ Exposes library functionality as cacheable, incremental Gradle tasks with `@Inpu
 
 Tasks:
 
-| Task | Description |
+|Task|Description|
 |---|---|
-| `ProcessMarkdownTask` | Applies a configured pipeline to a set of input `.md` files, writing results to an output directory |
-| `MergeMarkdownTask` | Concatenates multiple `.md` files (AST-level merge) into a single output file, with optional heading demotion per file |
-| `LintMarkdownTask` | Reports style violations (heading level skips, missing front matter fields, etc.) without modifying files |
+|`ProcessMarkdownTask`|Applies a configured pipeline to a set of input `.md` files, writing results to an output directory|
+|`MergeMarkdownTask`|Concatenates multiple `.md` files (AST-level merge) into a single output file, with optional heading demotion per file|
+|`LintMarkdownTask`|Reports style violations (heading level skips, missing front matter fields, etc.) without modifying files|
 
 The plugin registers a `markflow { }` extension block for project-level configuration.
 
@@ -116,12 +116,12 @@ The plugin registers a `markflow { }` extension block for project-level configur
 
 Sub-packages follow feature boundaries:
 
-| Package | Contents |
+|Package|Contents|
 |---|---|
-| `net.oxspring.markflow` | Public API: `MarkdownDocument`, `MarkdownParser`, `MarkdownPipeline`, `MarkdownFormatter` |
-| `net.oxspring.markflow.transform` | Built-in `MarkdownTransformer` implementations |
-| `net.oxspring.markflow.frontmatter` | `FrontMatter`, front matter access utilities |
-| `net.oxspring.markflow.gradle` | Gradle plugin and task implementations |
+|`net.oxspring.markflow`|Public API: `MarkdownDocument`, `MarkdownParser`, `MarkdownPipeline`, `MarkdownFormatter`|
+|`net.oxspring.markflow.transform`|Built-in `MarkdownTransformer` implementations|
+|`net.oxspring.markflow.frontmatter`|`FrontMatter`, front matter access utilities|
+|`net.oxspring.markflow.gradle`|Gradle plugin and task implementations|
 
 ## MVP Scope (v1.0)
 
@@ -142,10 +142,14 @@ markflow replaces this with a `ProcessMarkdownTask` configured with:
 
 ### Replaces front matter title extraction in `BuildPdfTask`
 
-`BuildPdfTask` reads `title:` from each file's YAML front matter and manually prepends
-`# Title
+`BuildPdfTask` reads `title:` from each file's YAML front matter and manually prepends:
 
-` before passing files to Pandoc. markflow replaces this with:
+```markdown
+# Title
+
+```
+
+before passing files to Pandoc. markflow replaces this with:
 
 - `TitlePromoter` transformer, promoting `title:` front matter to an H1 heading
 - `MergeMarkdownTask` concatenating pages in a declared order with a `HeadingDemoter` offset
@@ -159,7 +163,7 @@ markflow replaces this with a `ProcessMarkdownTask` configured with:
 - No heading level skips
 - Required front matter fields (configurable)
 
-## Build & Test
+## Build \& Test
 
 ```bash
 ./gradlew assemble   # Compile all modules
@@ -185,6 +189,17 @@ Fix any ktlint violations with:
 ./gradlew ktlintFormat
 ```
 
+### Linting the repo's own Markdown
+
+The `library` module includes `markdownCheck` and `markdownFormat` tasks that check and fix
+all `*.md` files in the repository. `markdownCheck` runs automatically as part of `./gradlew check`.
+
+To fix violations:
+
+```bash
+./gradlew :library:markdownFormat
+```
+
 ### Commit messages
 
 Commit messages are linted by [commitlint](https://commitlint.io) on push (conventional commits
@@ -201,14 +216,14 @@ feat: add Gradle plugin skeleton
 
 ## Key Dependencies
 
-| Dependency | Version | License |
+|Dependency|Version|License|
 |---|---|---|
-| commonmark-java | 0.30.x | BSD 2-Clause |
-| commonmark-ext-gfm-tables | 0.30.x | BSD 2-Clause |
-| commonmark-ext-yaml-front-matter | 0.30.x | BSD 2-Clause |
-| Jackson YAML | 2.x | Apache 2.0 |
-| Kotlin | 2.x | Apache 2.0 |
-| Gradle Plugin API | 9.x | Apache 2.0 |
+|commonmark-java|0.30.x|BSD 2-Clause|
+|commonmark-ext-gfm-tables|0.30.x|BSD 2-Clause|
+|commonmark-ext-yaml-front-matter|0.30.x|BSD 2-Clause|
+|Jackson YAML|2.x|Apache 2.0|
+|Kotlin|2.x|Apache 2.0|
+|Gradle Plugin API|9.x|Apache 2.0|
 
 ## License
 
