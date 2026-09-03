@@ -24,11 +24,11 @@ import org.gradle.work.DisableCachingByDefault
  *
  * Not wired into any lifecycle task — run explicitly:
  * ```
- * ./gradlew formatMarkdown
+ * ./gradlew markdownFormat
  * ```
  */
 @DisableCachingByDefault(because = "Formats files in-place; writes to its own inputs so cannot participate in the build cache")
-abstract class FormatMarkdownTask : DefaultTask() {
+abstract class MarkdownFormatTask : DefaultTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sources: ConfigurableFileCollection

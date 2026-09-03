@@ -16,11 +16,11 @@ import org.gradle.api.tasks.TaskAction
  * A file is considered a violation if its content differs from the output of parsing it and
  * re-rendering via [net.oxspring.markflow.MarkdownFormatter.toMarkdown]. No files are modified.
  *
- * Wired into the `check` lifecycle by the [MarkflowPlugin]. Run [FormatMarkdownTask] to fix
+ * Wired into the `check` lifecycle by the [MarkflowPlugin]. Run [MarkdownFormatTask] to fix
  * violations automatically.
  */
 @CacheableTask
-abstract class LintMarkdownTask : DefaultTask() {
+abstract class MarkdownCheckTask : DefaultTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sources: ConfigurableFileCollection
@@ -45,7 +45,7 @@ abstract class LintMarkdownTask : DefaultTask() {
         if (violations.isNotEmpty()) {
             throw GradleException(
                 "Markflow lint found ${violations.size} unformatted file(s). " +
-                    "Run the 'formatMarkdown' task to fix.",
+                    "Run the 'markdownFormat' task to fix.",
             )
         }
     }

@@ -8,8 +8,8 @@ import org.gradle.api.Project
  *
  * Registers:
  * - `markflow { }` extension for project-level configuration
- * - `lintMarkdown` task, wired into the `check` lifecycle
- * - `formatMarkdown` task, not wired into any lifecycle (run explicitly to fix violations)
+ * - `markdownCheck` task, wired into the `check` lifecycle
+ * - `markdownFormat` task, not wired into any lifecycle (run explicitly to fix violations)
  *
  * Apply via:
  * ```kotlin
@@ -41,13 +41,13 @@ class MarkflowPlugin : Plugin<Project> {
         )
 
         val lintTask =
-            target.tasks.register("lintMarkdown", LintMarkdownTask::class.java) { task ->
+            target.tasks.register("markdownCheck", MarkdownCheckTask::class.java) { task ->
                 task.group = "verification"
                 task.description = "Checks that all Markdown files are correctly formatted."
                 task.sources.from(extension.lint.sources)
             }
 
-        target.tasks.register("formatMarkdown", FormatMarkdownTask::class.java) { task ->
+        target.tasks.register("markdownFormat", MarkdownFormatTask::class.java) { task ->
             task.group = "formatting"
             task.description = "Formats all Markdown files in-place."
             task.sources.from(extension.lint.sources)
@@ -56,7 +56,7 @@ class MarkflowPlugin : Plugin<Project> {
             )
         }
 
-        // Wire lintMarkdown into the check lifecycle if the base plugin is applied.
+        // Wire markdownCheck into the check lifecycle if the base plugin is applied.
         target.plugins.withId("base") {
             target.tasks.named("check") { it.dependsOn(lintTask) }
         }
